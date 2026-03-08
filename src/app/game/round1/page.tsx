@@ -2,13 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Clock, HelpCircle, FastForward, CheckCircle2, XCircle, ChevronRight } from "lucide-react";
+import { Clock, HelpCircle, FastForward, CheckCircle2, XCircle, ChevronRight, Users, Play, Trophy } from "lucide-react";
+import GameBoard from "@/components/GameBoard";
+import { SNAKES_AND_LADDERS, QUESTIONS_PER_ROUND } from "@/lib/gameConstants";
 
 type Team = {
     id: number;
     name: string;
     color: string;
     scoreRound1: number;
+    position: number;
     positionRound2: number;
     totalScore: number;
     used5050: boolean;
@@ -41,12 +44,20 @@ export default function RoundOne() {
     const [isCorrect, setIsCorrect] = useState(false);
     const [pointsAwarded, setPointsAwarded] = useState(0);
 
+    const [isRoundStarted, setIsRoundStarted] = useState(false);
+    const [showTurnPopup, setShowTurnPopup] = useState(false);
+    const [questionsAnsweredPerTeam, setQuestionsAnsweredPerTeam] = useState<Record<number, number>>({});
+
     useEffect(() => {
         // Load teams from localStorage
         const saved = localStorage.getItem("ladder-session");
         if (saved) {
             const data = JSON.parse(saved);
-            setTeams(data.teams || []);
+            const loadedTeams = (data.teams || []).map((t: Team) => ({
+                ...t,
+                position: t.position || 1
+            }));
+            setTeams(loadedTeams);
         }
 
         // Fetch questions
@@ -89,7 +100,7 @@ export default function RoundOne() {
         setShowResult(true);
         setIsCorrect(false);
         setPointsAwarded(-1); // Negative marking for timeout
-        applyScore(-1);
+        applyScoreAndMove(-1, -1);
     };
 
     const handleAnswer = (option: string) => {
@@ -103,21 +114,45 @@ export default function RoundOne() {
 
         let pts = 0;
         if (correct) {
-            if (timeTaken <= 10) pts = 5;
-            else if (timeTaken <= 20) pts = 3;
-            else pts = 2;
+            if (timeTaken <= 10) pts = 10;
+            else if (timeTaken <= 20) pts = 6;
+            else pts = 3;
         } else {
             pts = -1; // Negative marking
         }
 
         setPointsAwarded(pts);
-        applyScore(pts);
+
+        // Board Movement Logic
+        let steps = 0;
+        if (correct) {
+            if (timeTaken <= 10) steps = 3;
+            else if (timeTaken <= 20) steps = 2;
+            else steps = 1;
+        } else {
+            steps = -1;
+        }
+
+        applyScoreAndMove(pts, steps);
         setShowResult(true);
     };
 
-    const applyScore = (pts: number) => {
+    const applyScoreAndMove = (pts: number, steps: number) => {
         const updated = [...teams];
-        updated[currentTeamIndex].scoreRound1 += pts;
+        const team = updated[currentTeamIndex];
+
+        team.scoreRound1 += pts;
+        team.totalScore += pts;
+
+        let newPos = (team.position || 0) + steps;
+        if (newPos < 1) newPos = 1;
+        if (newPos > 100) newPos = 100;
+
+        if (newPos in SNAKES_AND_LADDERS) {
+            newPos = SNAKES_AND_LADDERS[newPos];
+        }
+
+        team.position = newPos;
         setTeams(updated);
     };
 
@@ -151,17 +186,35 @@ export default function RoundOne() {
     const nextTurn = () => {
         setShowResult(false);
 
-        if (currentTeamIndex === teams.length - 1) {
-            // Round Finished? Let's just do 2 loops per team (8 questions total)
-            if (currentQuestionIndex >= 8) {
-                endRound1();
-                return;
-            }
-            setCurrentTeamIndex(0);
-        } else {
-            setCurrentTeamIndex(currentTeamIndex + 1);
+        // Update question count for the active team
+        const updatedCounts = { ...questionsAnsweredPerTeam };
+        updatedCounts[currentTeam.id] = (updatedCounts[currentTeam.id] || 0) + 1;
+        setQuestionsAnsweredPerTeam(updatedCounts);
+
+        // Check if ALL teams finished their 5 questions
+        const allFinished = teams.every(t => (updatedCounts[t.id] || 0) >= QUESTIONS_PER_ROUND);
+
+        if (allFinished) {
+            endRound1();
+            return;
         }
-        setCurrentQuestionIndex(currentQuestionIndex + 1);
+
+        // Cycle to next team
+        let nextIndex = (currentTeamIndex + 1) % teams.length;
+
+        // Find next team that still has questions left
+        while ((updatedCounts[teams[nextIndex].id] || 0) >= QUESTIONS_PER_ROUND) {
+            nextIndex = (nextIndex + 1) % teams.length;
+        }
+
+        setCurrentTeamIndex(nextIndex);
+        setCurrentQuestionIndex(prev => prev + 1);
+        setShowTurnPopup(true);
+    };
+
+    const startRound = () => {
+        setIsRoundStarted(true);
+        setShowTurnPopup(true);
     };
 
     const endRound1 = () => {
@@ -169,142 +222,194 @@ export default function RoundOne() {
         if (saved) {
             const data = JSON.parse(saved);
             data.teams = teams;
-            data.status = "ROUND2";
+            data.status = "ROUND1_COMPLETE"; // Modified state for intermediate leaderboard
             localStorage.setItem("ladder-session", JSON.stringify(data));
         }
-        router.push("/game/round2");
+        router.push("/game/leaderboard");
     };
 
-    if (questions.length === 0 || !currentTeam) {
+    if (questions.length === 0 || teams.length === 0) {
         return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
     }
 
     return (
-        <div className="flex flex-col gap-8 max-w-5xl mx-auto py-8">
+        <div className="flex flex-col h-screen max-h-screen overflow-hidden bg-[#0f172a] text-white">
 
-            {/* Top Bar */}
-            <div className="flex justify-between items-center glass p-4">
-                <div>
-                    <h2 className="text-xl font-bold text-gold tracking-widest">ROUND 1: CLINICAL TRIVIA</h2>
-                    <p className="text-sm text-zinc-400">Time-based scoring. -1 for incorrect answers.</p>
-                </div>
-                <div className="flex gap-4">
-                    {teams.map((t, i) => (
-                        <div
-                            key={t.id}
-                            className={`px-4 py-2 rounded-lg border-2 transition-all ${currentTeamIndex === i ? 'bg-white/10 scale-110 shadow-lg' : 'opacity-50 border-transparent'}`}
-                            style={{ borderColor: currentTeamIndex === i ? t.color : 'transparent' }}
-                        >
-                            <div className="text-[10px] font-bold" style={{ color: t.color }}>{t.name}</div>
-                            <div className="text-xl font-black">{t.scoreRound1} pts</div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Main Play Area */}
-            <div className="glass p-8 md:p-12 relative overflow-hidden" style={{ borderColor: `${currentTeam.color}50` }}>
-                <div className="absolute top-0 left-0 w-full h-2" style={{ backgroundColor: currentTeam.color }} />
-
-                <div className="flex justify-between items-end mb-8">
-                    <div>
-                        <div className="text-sm font-bold uppercase tracking-widest" style={{ color: currentTeam.color }}>
-                            Current Turn: {currentTeam.name}
-                        </div>
-                        <h3 className="text-3xl font-medium mt-2">Question {currentQuestionIndex + 1}</h3>
+            {/* Top Bar - Compact */}
+            <div className="flex justify-between items-center glass p-3 shrink-0">
+                <div className="flex items-center gap-4">
+                    <h2 className="text-lg font-black text-gold tracking-widest hidden md:block">EXPEDITION ROUND 1</h2>
+                    <div className="flex gap-2">
+                        {teams.map((t, i) => (
+                            <div
+                                key={t.id}
+                                className={`px-4 py-1 rounded-lg border-2 transition-all ${currentTeamIndex === i ? 'bg-white/10 scale-105 shadow-lg' : 'opacity-40'}`}
+                                style={{ borderColor: currentTeamIndex === i ? t.color : 'transparent' }}
+                            >
+                                <div className="text-[12px] font-black" style={{ color: t.color }}>{t.scoreRound1}</div>
+                            </div>
+                        ))}
                     </div>
+                </div>
 
+                <div className="flex items-center gap-8">
+                    <div className="flex flex-col items-end">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Q Asked</span>
+                        <div className="text-xl font-black text-white">
+                            {questionsAnsweredPerTeam[currentTeam.id] || 0} / {QUESTIONS_PER_ROUND}
+                        </div>
+                    </div>
                     <div className="text-right">
-                        <div className={`text-6xl font-black ${timeLeft <= 10 ? 'text-red-500 animate-pulse' : 'text-white'}`}>
+                        <div className={`text-3xl font-black ${timeLeft <= 10 ? 'text-red-500 animate-pulse' : 'text-white'}`}>
                             {timeLeft}s
                         </div>
-                        <div className="text-xs text-zinc-500 font-bold tracking-widest mt-1">TIME REMAINING</div>
+                    </div>
+                    <div className="flex items-center gap-2 px-4 py-1 bg-white/10 rounded-full border" style={{ borderColor: `${currentTeam.color}40`, color: currentTeam.color }}>
+                        <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: currentTeam.color, boxShadow: `0 0 10px ${currentTeam.color}` }} />
+                        <span className="text-sm font-bold uppercase tracking-widest">{currentTeam.name}</span>
                     </div>
                 </div>
-
-                {/* Question Text */}
-                <div className="text-2xl md:text-3xl font-semibold leading-relaxed mb-12">
-                    "{question.text}"
-                </div>
-
-                {/* Options */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                    {['A', 'B', 'C', 'D'].map((letter) => {
-                        if (hiddenOptions.includes(letter)) return <div key={letter} className="p-6 border-2 border-transparent" />; // Placeholder
-
-                        const isSelected = selectedOption === letter;
-                        const isRight = showResult && letter === question.correctOption;
-                        const isWrong = showResult && isSelected && !isRight;
-
-                        let bgClass = "bg-white/5 hover:bg-white/10 hover:border-white/30";
-                        if (isSelected) bgClass = "bg-white/20 border-white";
-                        if (isRight) bgClass = "bg-green-500/20 border-green-500 text-green-100";
-                        if (isWrong) bgClass = "bg-red-500/20 border-red-500 text-red-100";
-
-                        return (
-                            <button
-                                key={letter}
-                                onClick={() => !showResult && handleAnswer(letter)}
-                                disabled={showResult}
-                                className={`p-6 rounded-2xl border-2 text-left transition-all ${bgClass} ${showResult ? 'cursor-default' : 'cursor-pointer'}`}
-                            >
-                                <div className="flex gap-4 items-center">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-black/50 ${isSelected ? 'text-white' : 'text-zinc-400'}`}>
-                                        {letter}
-                                    </div>
-                                    <div className="text-lg">
-                                        {question[`option${letter}` as keyof Question]}
-                                    </div>
-                                </div>
-                            </button>
-                        )
-                    })}
-                </div>
-
-                {/* Lifelines */}
-                {!showResult && (
-                    <div className="flex gap-4 justify-center border-t border-white/10 pt-8 mt-4">
-                        <button
-                            onClick={use5050}
-                            disabled={currentTeam.used5050}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold ${currentTeam.used5050 ? 'bg-zinc-800 text-zinc-600' : 'bg-primary-mid text-accent-pink hover:bg-accent-magenta hover:text-white transition-colors'}`}
-                        >
-                            <HelpCircle size={20} /> 50:50 Lifeline
-                        </button>
-                        <button
-                            onClick={useSkip}
-                            disabled={currentTeam.usedSkip}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold ${currentTeam.usedSkip ? 'bg-zinc-800 text-zinc-600' : 'bg-primary-mid text-accent-gold hover:bg-accent-gold hover:text-black transition-colors'}`}
-                        >
-                            <FastForward size={20} /> Skip Question
-                        </button>
-                    </div>
-                )}
-
-                {/* Result Overlay */}
-                {showResult && (
-                    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in duration-300">
-                        {isCorrect ? (
-                            <CheckCircle2 size={100} className="text-green-500 mb-6 drop-shadow-[0_0_30px_rgba(34,197,94,0.5)]" />
-                        ) : (
-                            <XCircle size={100} className="text-red-500 mb-6 drop-shadow-[0_0_30px_rgba(239,68,68,0.5)]" />
-                        )}
-
-                        <h2 className={`text-5xl font-black mb-2 ${isCorrect ? 'text-green-400' : 'text-red-400'}`}>
-                            {isCorrect ? 'CORRECT!' : 'INCORRECT'}
-                        </h2>
-
-                        <p className="text-2xl text-white mb-8">
-                            {pointsAwarded > 0 ? `+${pointsAwarded} Points` : `${pointsAwarded} Points`}
-                        </p>
-
-                        <button onClick={nextTurn} className="button-premium px-12 py-4 text-xl flex items-center gap-3">
-                            NEXT TEAM <ChevronRight />
-                        </button>
-                    </div>
-                )}
-
             </div>
+
+            {/* Main Content Area: Side-by-Side */}
+            <div className="flex flex-row flex-1 min-h-0 overflow-hidden p-6 gap-6">
+
+                {/* Left Side: The Board (Full Height) */}
+                <div className="flex-[3] flex items-center justify-center relative">
+                    <GameBoard
+                        teams={teams.map(t => ({ id: t.id, name: t.name, color: t.color, position: t.position || 0 }))}
+                        containerClassName="h-full w-full max-h-full aspect-square p-2"
+                    />
+                </div>
+
+                {/* Right Side: Question & Answers */}
+                <div className="flex-[2] flex flex-col gap-6 overflow-y-auto">
+                    <div className="glass p-8 flex-1 flex flex-col justify-center relative border-t-4" style={{ borderColor: currentTeam.color }}>
+                        <div className="w-full flex flex-col gap-8 relative shrink-0">
+                            <div className="space-y-2">
+                                <div className="flex items-start gap-4">
+                                    <div className="p-3 rounded-2xl bg-white/5 border-2 shrink-0 animate-in zoom-in duration-700" style={{ borderColor: currentTeam.color, boxShadow: `0 0 20px ${currentTeam.color}20` }}>
+                                        <Users size={28} style={{ color: currentTeam.color }} />
+                                    </div>
+                                    <h3 className="text-2xl md:text-3xl font-bold leading-tight">
+                                        {question.text}
+                                    </h3>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4">
+                                {['A', 'B', 'C', 'D'].map((letter) => {
+                                    if (hiddenOptions.includes(letter)) return <div key={letter} className="p-5 border-2 border-transparent" />;
+                                    const isSelected = selectedOption === letter;
+                                    const isRight = showResult && letter === question.correctOption;
+                                    const isWrong = showResult && isSelected && !isRight;
+
+                                    let bgClass = "bg-white/5 hover:bg-white/10 border-white/10";
+                                    if (isSelected) bgClass = "bg-white/20 border-white";
+                                    if (isRight) bgClass = "bg-green-500/30 border-green-500 text-green-100";
+                                    if (isWrong) bgClass = "bg-red-500/30 border-red-500 text-red-100";
+
+                                    return (
+                                        <button
+                                            key={letter}
+                                            onClick={() => !showResult && handleAnswer(letter)}
+                                            disabled={showResult}
+                                            className={`p-6 rounded-2xl border-2 text-left transition-all ${bgClass} flex items-center gap-5 group`}
+                                        >
+                                            <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center font-black text-lg bg-black/50 group-hover:scale-110 transition-transform`}>
+                                                {letter}
+                                            </div>
+                                            <div className="text-lg font-bold leading-snug">
+                                                {question[`option${letter}` as keyof Question]}
+                                            </div>
+                                        </button>
+                                    )
+                                })}
+                            </div>
+
+                            {/* Lifelines */}
+                            {!showResult && (
+                                <div className="flex gap-4 justify-start pt-4">
+                                    <button onClick={use5050} disabled={currentTeam.used5050} className={`flex items-center gap-3 px-8 py-4 rounded-xl font-black text-sm transition-all ${currentTeam.used5050 ? 'opacity-30 grayscale' : 'bg-white/5 border border-white/10 hover:bg-accent-magenta hover:border-accent-magenta hover:text-white'}`}>
+                                        <HelpCircle size={20} /> 50:50
+                                    </button>
+                                    <button onClick={useSkip} disabled={currentTeam.usedSkip} className={`flex items-center gap-3 px-8 py-4 rounded-xl font-black text-sm transition-all ${currentTeam.usedSkip ? 'opacity-30 grayscale' : 'bg-white/5 border border-white/10 hover:bg-accent-gold hover:text-black hover:border-accent-gold'}`}>
+                                        <FastForward size={20} /> SKIP
+                                    </button>
+                                    <button onClick={() => alert("Scientific Consultation: Based on Dufogen protocols, option " + question.correctOption + " is indicated.")} className="flex items-center gap-3 px-8 py-4 rounded-xl font-black text-sm bg-white/5 border border-white/10 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all">
+                                        <Users size={20} /> CONSULT
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Result Overlay */}
+                        {showResult && (
+                            <div className="absolute inset-0 bg-[#0f172a]/95 backdrop-blur-xl flex flex-col items-center justify-center animate-in fade-in duration-500 z-50 p-8 text-center">
+                                <div className="flex flex-col items-center gap-8">
+                                    <div className="relative">
+                                        {isCorrect ? <CheckCircle2 size={120} className="text-green-500 drop-shadow-[0_0_20px_rgba(34,197,94,0.5)]" /> : <XCircle size={120} className="text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.5)]" />}
+                                    </div>
+                                    <div>
+                                        <h2 className={`text-6xl font-black tracking-tighter ${isCorrect ? 'text-green-400' : 'text-red-400'}`}>
+                                            {isCorrect ? 'VERIFIED' : 'FAILED'}
+                                        </h2>
+                                        <p className="text-2xl font-bold text-white/60 mt-2 uppercase tracking-widest">{pointsAwarded > 0 ? `+${pointsAwarded} Bonus Points` : `${pointsAwarded} Point Penalty`}</p>
+                                    </div>
+                                    <button onClick={nextTurn} className="button-premium px-12 py-6 text-2xl flex items-center gap-4 group">
+                                        PROCEED <ChevronRight className="group-hover:translate-x-2 transition-transform" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Team Status Summary */}
+                    <div className="glass p-6 grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Current XP</span>
+                            <div className="text-3xl font-black" style={{ color: currentTeam.color }}>{currentTeam.scoreRound1}</div>
+                        </div>
+                        <div className="space-y-1">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Current Position</span>
+                            <div className="text-3xl font-black text-accent-gold">{currentTeam.position || 0}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/* Round Start Popup */}
+            {!isRoundStarted && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-[#0f172a]/80 backdrop-blur-md animate-in fade-in duration-500">
+                    <div className="max-w-xl w-full glass p-12 text-center space-y-8 animate-in zoom-in duration-500">
+                        <Trophy size={80} className="mx-auto text-accent-gold" />
+                        <div className="space-y-4">
+                            <h2 className="text-5xl font-black tracking-tighter uppercase italic">Expedition Round 1</h2>
+                            <p className="text-zinc-400 font-medium">5 Questions per team. 10/6/3 XP Based on speed. Correct answers advance your position on the board.</p>
+                        </div>
+                        <button onClick={startRound} className="button-premium px-12 py-5 text-xl flex items-center gap-3 mx-auto">
+                            <Play size={24} fill="currentColor" /> BEGIN EXPEDITION
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Team Turn Popup */}
+            {isRoundStarted && showTurnPopup && (
+                <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="max-w-lg w-full glass p-10 text-center space-y-6 border-b-8 animate-in slide-in-from-bottom-12 duration-500" style={{ borderColor: currentTeam.color }}>
+                        <div className="w-20 h-20 rounded-2xl bg-white/5 border-2 flex items-center justify-center mx-auto" style={{ borderColor: currentTeam.color }}>
+                            <Users size={40} style={{ color: currentTeam.color }} />
+                        </div>
+                        <div className="space-y-2">
+                            <h3 className="text-4xl font-black uppercase">{currentTeam.name}</h3>
+                            <p className="text-lg font-bold text-zinc-400 tracking-widest uppercase">Your Question is Ready</p>
+                        </div>
+                        <button onClick={() => setShowTurnPopup(false)} className="button-premium px-10 py-4 text-lg w-full">
+                            VIEW QUESTION
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

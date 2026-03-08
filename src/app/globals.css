@@ -1,16 +1,16 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;500;700&display=swap');
+@import "tailwindcss";
 
 :root {
-  --primary-dark: #1e0521;
-  --primary-mid: #3b0d2c;
-  --accent-magenta: #7b1fa2;
-  --accent-pink: #f8c8dc;
-  --accent-gold: #d4af37;
-  --accent-gold-glow: #fdfd96;
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+  --primary-dark: #0f172a;
+  --primary-mid: #1e293b;
+  --accent-magenta: #c026d3;
+  --accent-pink: #f472b6;
+  --accent-gold: #fbbf24;
+  --accent-gold-glow: #fef08a;
+  --glass-bg: rgba(15, 23, 42, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
   --text-primary: #ffffff;
   --text-secondary: #e0e0e0;
 }
@@ -41,20 +41,20 @@ h4,
 /* Sophisticated Glassmorphism */
 .glass {
   background: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
-  border-radius: 20px;
+  border-radius: 24px;
 }
 
 /* Female Glow Effect */
 .glow-magenta {
-  box-shadow: 0 0 30px rgba(123, 31, 162, 0.2);
+  box-shadow: 0 0 40px -10px rgba(192, 38, 211, 0.4);
 }
 
 .glow-gold {
-  box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 0 40px -10px rgba(251, 191, 36, 0.4);
 }
 
 /* Gradients */
@@ -130,24 +130,25 @@ h4,
   padding: 2rem;
 }
 
-.button-premium {
-  background: linear-gradient(135deg, var(--accent-magenta), var(--primary-mid));
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
-  padding: 1rem 2.5rem;
-  border-radius: 50px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+/* Custom Scrollbar for side panels */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
 }
 
-.button-premium:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 8px 25px rgba(123, 31, 162, 0.4);
-  background: linear-gradient(135deg, #8e24aa, #4a148c);
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
 }
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.button-premium {}
 
 .button-premium:active {
   transform: translateY(0) scale(0.98);

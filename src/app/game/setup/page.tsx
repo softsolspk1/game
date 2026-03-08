@@ -24,6 +24,7 @@ export default function SetupPage() {
             teams: teams.map(t => ({
                 ...t,
                 scoreRound1: 0,
+                position: 0,
                 positionRound2: 0,
                 totalScore: 0,
                 used5050: false,
