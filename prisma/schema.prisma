@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Question {
+  id             String   @id @default(cuid())
+  text           String
+  optionA        String
+  optionB        String
+  optionC        String
+  optionD        String
+  correctOption  String   // "A", "B", "C", or "D"
+  difficulty     Int      @default(1) // 1 for Round 1, 2 for Round 2
+  category       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Session {
+  id             String   @id @default(cuid())
+  status         String   @default("SETUP") // SETUP, ROUND1, ROUND2, COMPLETED
+  currentRound   Int      @default(1)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  teams          Team[]
+}
+
+model Team {
+  id             String   @id @default(cuid())
+  name           String
+  color          String   // CSS color for the piece (e.g. #7b1fa2)
+  scoreRound1    Int      @default(0) // time-based scoring
+  positionRound2 Int      @default(0) // 0 to 100 for the board
+  totalScore     Int      @default(0) // combine if needed
+  used5050       Boolean  @default(false)
+  usedSkip       Boolean  @default(false)
+  sessionId      String
+  session        Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
