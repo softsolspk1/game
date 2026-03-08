@@ -153,6 +153,16 @@ export default function RoundOne() {
         }
 
         team.position = newPos;
+        console.log(`[ROUND 1] Team ${team.name} answered. Pts: ${pts}, Steps: ${steps}, New Pos: ${newPos}, Total XP: ${team.totalScore}`);
+
+        // Persist immediately to avoid state loss
+        const saved = localStorage.getItem("ladder-session");
+        if (saved) {
+            const data = JSON.parse(saved);
+            data.teams = updated;
+            localStorage.setItem("ladder-session", JSON.stringify(data));
+        }
+
         setTeams(updated);
     };
 

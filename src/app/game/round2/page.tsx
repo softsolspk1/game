@@ -164,6 +164,7 @@ export default function RoundTwo() {
         // team.totalScore += pts; // ALREADY ADDED ABOVE
 
         setTeams(updated);
+        console.log(`[ROUND 2] Team ${team.name} moved. Roll: ${steps}, Pts: ${pts}, New Pos: ${newPos}, New Total Score: ${team.totalScore}`);
 
         const saved = localStorage.getItem("ladder-session");
         if (saved) {
@@ -388,12 +389,18 @@ export default function RoundTwo() {
                     {/* Team Stats Summary */}
                     <div className="glass p-6 grid grid-cols-2 gap-4 h-32 shrink-0">
                         <div className="space-y-1">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Current Position</span>
-                            <div className="text-4xl font-black text-accent-gold">{currentTeam.position || 0}</div>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Current Progress</span>
+                            <div className="flex items-baseline gap-2">
+                                <div className="text-4xl font-black text-accent-gold">{currentTeam.position || 0}</div>
+                                <div className="text-xs font-bold text-zinc-500 uppercase tracking-tighter">Pos</div>
+                            </div>
                         </div>
                         <div className="space-y-1">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Active Team</span>
-                            <div className="text-2xl font-black truncate" style={{ color: currentTeam.color }}>{currentTeam.name}</div>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Accumulated XP</span>
+                            <div className="flex items-baseline gap-2">
+                                <div className="text-4xl font-black text-white">{currentTeam.totalScore}</div>
+                                <div className="text-xs font-bold text-zinc-500 uppercase tracking-tighter">Pts</div>
+                            </div>
                         </div>
                     </div>
                 </div>
