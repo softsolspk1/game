@@ -53,15 +53,32 @@ export default function RoundTwo() {
     useEffect(() => {
         const saved = localStorage.getItem("ladder-session");
         if (saved) {
-            const data = JSON.parse(saved);
-            setTeams(data.teams || []);
+            try {
+                const data = JSON.parse(saved);
+                const loadedTeams = (data.teams || []);
+                if (loadedTeams.length > 0) {
+                    setTeams(loadedTeams);
+                } else {
+                    router.push("/");
+                }
+            } catch (e) {
+                console.error("Failed to parse ladder-session", e);
+                router.push("/");
+            }
         } else {
-            router.push("/game/setup");
+            router.push("/");
         }
 
         fetch("/api/questions?difficulty=2")
             .then(res => res.json())
-            .then(data => setQuestions(data.sort(() => 0.5 - Math.random())));
+            .then(data => {
+                if (Array.isArray(data)) {
+                    setQuestions(data.sort(() => 0.5 - Math.random()));
+                } else {
+                    console.error("Invalid questions data type:", typeof data);
+                }
+            })
+            .catch(err => console.error("Questions fetch failed:", err));
     }, [router]);
 
     const currentTeam = teams[currentTeamIndex];

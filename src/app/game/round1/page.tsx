@@ -52,23 +52,38 @@ export default function RoundOne() {
         // Load teams from localStorage
         const saved = localStorage.getItem("ladder-session");
         if (saved) {
-            const data = JSON.parse(saved);
-            const loadedTeams = (data.teams || []).map((t: Team) => ({
-                ...t,
-                position: t.position || 1
-            }));
-            setTeams(loadedTeams);
+            try {
+                const data = JSON.parse(saved);
+                const loadedTeams = (data.teams || []).map((t: Team) => ({
+                    ...t,
+                    position: t.position || 1
+                }));
+                if (loadedTeams.length > 0) {
+                    setTeams(loadedTeams);
+                } else {
+                    router.push("/");
+                }
+            } catch (e) {
+                console.error("Failed to parse ladder-session", e);
+                router.push("/");
+            }
+        } else {
+            router.push("/");
         }
 
         // Fetch questions
         fetch("/api/questions?difficulty=1")
             .then((res) => res.json())
             .then((data) => {
-                // Shuffle questions
-                const shuffled = data.sort(() => 0.5 - Math.random());
-                setQuestions(shuffled);
-            });
-    }, []);
+                if (Array.isArray(data)) {
+                    const shuffled = data.sort(() => 0.5 - Math.random());
+                    setQuestions(shuffled);
+                } else {
+                    console.error("Invalid questions data type:", typeof data);
+                }
+            })
+            .catch(err => console.error("Questions fetch failed:", err));
+    }, [router]);
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
