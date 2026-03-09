@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Clock, HelpCircle, FastForward, CheckCircle2, XCircle, ChevronRight, Users, Play, Trophy } from "lucide-react";
 import GameBoard from "@/components/GameBoard";
@@ -97,6 +97,17 @@ export default function RoundOne() {
         return () => clearInterval(interval);
     }, [timerActive, timeLeft]);
 
+    // Audio helpers
+    const playCorrect = () => {
+        const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2012/2012-preview.mp3");
+        audio.play().catch(e => console.warn("Audio play blocked", e));
+    };
+
+    const playWrong = () => {
+        const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3");
+        audio.play().catch(e => console.warn("Audio play blocked", e));
+    };
+
     // Start timer when a new question is loaded and ready
     useEffect(() => {
         if (questions.length > 0 && !showResult) {
@@ -112,6 +123,7 @@ export default function RoundOne() {
 
     const handleTimeOut = () => {
         setTimerActive(false);
+        playWrong();
         setShowResult(true);
         setIsCorrect(false);
         setPointsAwarded(-1); // Penalty for timeout
@@ -130,6 +142,7 @@ export default function RoundOne() {
         let pts = 0;
         let steps = 0;
         if (correct) {
+            playCorrect();
             if (timeTaken <= 10) {
                 pts = 10;
                 steps = 10;
@@ -141,6 +154,7 @@ export default function RoundOne() {
                 steps = 3;
             }
         } else {
+            playWrong();
             pts = -1; // Penalty for incorrect answer
             steps = -1;
         }

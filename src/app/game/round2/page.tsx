@@ -47,6 +47,17 @@ export default function RoundTwo() {
     const [pointsAwarded, setPointsAwarded] = useState(0);
     const [startTime, setStartTime] = useState(0);
 
+    // Audio helpers
+    const playCorrect = () => {
+        const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2012/2012-preview.mp3");
+        audio.play().catch(e => console.warn("Audio play blocked", e));
+    };
+
+    const playWrong = () => {
+        const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3");
+        audio.play().catch(e => console.warn("Audio play blocked", e));
+    };
+
     const [isRoundStarted, setIsRoundStarted] = useState(false);
     const [showTurnPopup, setShowTurnPopup] = useState(false);
     const [questionsAnsweredPerTeam, setQuestionsAnsweredPerTeam] = useState<Record<number, number>>({});
@@ -140,8 +151,10 @@ export default function RoundTwo() {
 
         let pts = 0;
         if (correct) {
+            playCorrect();
             pts = diceValue; // Dice-based scoring, no time bonus
         } else {
+            playWrong();
             pts = -1; // Penalty for wrong answer
         }
         setPointsAwarded(pts);
