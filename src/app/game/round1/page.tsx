@@ -301,7 +301,7 @@ export default function RoundOne() {
             <div className="flex flex-row flex-1 min-h-0 overflow-hidden p-6 gap-6">
 
                 {/* Left Side: The Board (Full Height) */}
-                <div className="flex-[3] flex items-center justify-center relative">
+                <div className="flex-1 flex items-center justify-center relative">
                     <GameBoard
                         teams={teams.map(t => ({ id: t.id, name: t.name, color: t.color, position: t.position || 0 }))}
                         containerClassName="h-full w-full max-h-full aspect-square p-2"
@@ -309,7 +309,7 @@ export default function RoundOne() {
                 </div>
 
                 {/* Right Side: Question & Answers */}
-                <div className="flex-[2] flex flex-col gap-6 overflow-y-auto">
+                <div className="flex-1 flex flex-col gap-6 overflow-y-auto">
                     <div className="glass p-8 flex-1 flex flex-col justify-center relative border-t-4" style={{ borderColor: currentTeam.color }}>
                         <div className="w-full flex flex-col gap-8 relative shrink-0">
                             <div className="space-y-2">

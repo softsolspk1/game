@@ -140,11 +140,9 @@ export default function RoundTwo() {
 
         let pts = 0;
         if (correct) {
-            if (timeTaken <= 10) pts = 10;
-            else if (timeTaken <= 20) pts = 6;
-            else pts = 3;
+            pts = diceValue; // Dice-based scoring, no time bonus
         } else {
-            pts = -1;
+            pts = -1; // Penalty for wrong answer
         }
         setPointsAwarded(pts);
 
@@ -278,7 +276,7 @@ export default function RoundTwo() {
             <div className="flex flex-row flex-1 min-h-0 overflow-hidden p-6 gap-6">
 
                 {/* Left Side: The Board (Full Height) */}
-                <div className="flex-[3] flex items-center justify-center relative">
+                <div className="flex-1 flex items-center justify-center relative">
                     <GameBoard
                         teams={teams.map(t => ({ id: t.id, name: t.name, color: t.color, position: t.position || 0 }))}
                         containerClassName="h-full w-full max-h-full aspect-square p-2"
@@ -286,7 +284,7 @@ export default function RoundTwo() {
                 </div>
 
                 {/* Right Side: Dice & Activity */}
-                <div className="flex-[2] flex flex-col gap-6 overflow-y-auto">
+                <div className="flex-1 flex flex-col gap-6 overflow-y-auto">
                     {/* Dice Station or Question Phase */}
                     <div className="glass flex-1 flex flex-col relative border-t-4 overflow-hidden" style={{ borderColor: currentTeam.color }}>
                         {!showQuestion ? (
@@ -436,7 +434,7 @@ export default function RoundTwo() {
                         </div>
                         <div className="space-y-4">
                             <h2 className="text-5xl font-black tracking-tighter uppercase italic">Expedition Round 2</h2>
-                            <p className="text-zinc-400 font-medium">Final Ascent. 5 Questions per team. Dice rolls are gated by medical inquiries. First to 100 or highest XP wins.</p>
+                            <p className="text-zinc-400 font-medium">Final Ascent. 5 Questions per team. Dice rolls are gated by medical inquiries. Correct answer moves you by dice value. Penalty of -1 for wrong answers.</p>
                         </div>
                         <button onClick={() => { setIsRoundStarted(true); setShowTurnPopup(true); }} className="button-premium px-12 py-5 text-xl flex items-center gap-3 mx-auto">
                             <Play size={24} fill="currentColor" /> START FINAL ROUND

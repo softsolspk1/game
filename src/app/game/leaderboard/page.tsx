@@ -36,14 +36,6 @@ export default function Leaderboard() {
                 return b.totalScore - a.totalScore;
             });
             setTeams(sorted);
-
-            // Auto-advance to Round 2 after 5 seconds if Round 1 just finished
-            if (currentStatus === "ROUND1_COMPLETE") {
-                const timer = setTimeout(() => {
-                    router.push("/game/round2");
-                }, 5000);
-                return () => clearTimeout(timer);
-            }
         }
     }, [router]);
 
@@ -135,6 +127,22 @@ export default function Leaderboard() {
                                 </div>
                             ))}
                         </div>
+
+                        {/* Prominent Proceed Button for Round 1 End */}
+                        {gameStatus === "ROUND1_COMPLETE" && (
+                            <div className="mt-8 pt-6 border-t border-white/10">
+                                <button
+                                    onClick={() => router.push("/game/round2")}
+                                    className="button-premium w-full py-6 text-xl flex items-center justify-center gap-4 animate-pulse group"
+                                >
+                                    <span className="font-black tracking-widest uppercase italic">Initiate Round 2 Expedition</span>
+                                    <ChevronRight className="group-hover:translate-x-2 transition-transform" />
+                                </button>
+                                <p className="text-[10px] text-zinc-500 font-black text-center mt-3 tracking-widest uppercase">
+                                    All teams successfully synchronized for the next phase
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
