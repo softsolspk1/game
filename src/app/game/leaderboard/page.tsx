@@ -13,6 +13,7 @@ type Team = {
     position: number;
     positionRound2: number;
     totalScore: number;
+    finishedRank?: number;
 };
 
 export default function Leaderboard() {
@@ -24,17 +25,27 @@ export default function Leaderboard() {
         const saved = localStorage.getItem("ladder-session");
         if (saved) {
             const data = JSON.parse(saved);
-            setGameStatus(data.status || "");
-            // Sort primarily by totalScore, then position/positionRound2 if tied
+            const currentStatus = data.status || "";
+            setGameStatus(currentStatus);
+
+            // Sort primarily by finishedRank (1, 2, 3), then totalScore
             const sorted = (data.teams || []).sort((a: Team, b: Team) => {
-                if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
-                const posA = a.positionRound2 || a.position || 0;
-                const posB = b.positionRound2 || b.position || 0;
-                return posB - posA;
+                const rankA = a.finishedRank || 999;
+                const rankB = b.finishedRank || 999;
+                if (rankA !== rankB) return rankA - rankB;
+                return b.totalScore - a.totalScore;
             });
             setTeams(sorted);
+
+            // Auto-advance to Round 2 after 5 seconds if Round 1 just finished
+            if (currentStatus === "ROUND1_COMPLETE") {
+                const timer = setTimeout(() => {
+                    router.push("/game/round2");
+                }, 5000);
+                return () => clearTimeout(timer);
+            }
         }
-    }, []);
+    }, [router]);
 
     if (teams.length === 0) return <div className="min-h-screen grid place-items-center">Loading...</div>;
 
@@ -48,7 +59,7 @@ export default function Leaderboard() {
                 <div className="flex items-center gap-4">
                     <Trophy className="text-accent-gold" size={24} />
                     <h1 className="text-xl font-black tracking-[0.2em] uppercase text-gradient-gold">
-                        Expedition Leaderboard
+                        {gameStatus === "ROUND1_COMPLETE" ? "Expedition Round 1 Results" : "Expedition Leaderboard"}
                     </h1>
                 </div>
                 <button
@@ -113,7 +124,9 @@ export default function Leaderboard() {
                                         </div>
                                         <div>
                                             <h4 className="text-lg font-bold leading-tight" style={{ color: team.color }}>{team.name}</h4>
-                                            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-tighter">Pos: {team.positionRound2 || team.position || 1} • XP: {team.totalScore}</p>
+                                            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-tighter">
+                                                {team.finishedRank ? `Rank: ${team.finishedRank} • Finished` : `Pos: ${team.positionRound2 || team.position || 1} • In Progress`} • XP: {team.totalScore}
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="text-2xl font-black text-white">

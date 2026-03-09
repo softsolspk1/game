@@ -26,6 +26,7 @@ type Team = {
     totalScore: number;
     used5050: boolean;
     usedSkip: boolean;
+    finishedRank?: number; // 0 if not finished, 1, 2, 3 etc.
 };
 
 export default function RoundTwo() {
@@ -154,9 +155,11 @@ export default function RoundTwo() {
         setShowQuestion(false);
         setShowResult(false);
         if (isCorrect) {
-            movePlayer(diceValue, pointsAwarded);
+            // "Proper as per numbers": Move based on points (10/6/3)
+            movePlayer(pointsAwarded, pointsAwarded);
         } else {
-            movePlayer(0, pointsAwarded);
+            // Penalty: -1 point and -1 movement as per Round 1 rules
+            movePlayer(-1, -1);
         }
     };
 
@@ -164,24 +167,30 @@ export default function RoundTwo() {
         const updated = [...teams];
         const team = updated[currentTeamIndex];
 
-        // team.scoreRound1 += pts; // REMOVED: This should not update Round 1 score in Round 2
         team.totalScore += pts;
         const currentPos = team.position || 0;
         let newPos = currentPos + steps;
+
+        if (newPos < 1) newPos = 1;
         if (newPos > 100) newPos = 100;
 
         const transitions = SNAKES_AND_LADDERS;
-
         if (newPos in transitions) {
             newPos = transitions[newPos];
         }
 
+        const prevPos = team.position;
         team.position = newPos;
         team.positionRound2 = newPos;
-        // team.totalScore += pts; // ALREADY ADDED ABOVE
+
+        // Check for finish
+        if (newPos >= 100 && prevPos < 100) {
+            const winnersCount = updated.filter(t => (t.position || 0) >= 100).length;
+            team.finishedRank = winnersCount;
+        }
 
         setTeams(updated);
-        console.log(`[ROUND 2] Team ${team.name} moved. Roll: ${steps}, Pts: ${pts}, New Pos: ${newPos}, New Total Score: ${team.totalScore}`);
+        console.log(`[ROUND 2] Team ${team.name} moved. Steps: ${steps}, Pts: ${pts}, New Pos: ${newPos}`);
 
         const saved = localStorage.getItem("ladder-session");
         if (saved) {
@@ -191,27 +200,22 @@ export default function RoundTwo() {
         }
 
         setTimeout(() => {
-            if (newPos >= 100) {
+            const finishedTeamsCount = updated.filter(t => (t.position || 0) >= 100).length;
+            const activeTeamsCount = updated.length - finishedTeamsCount;
+
+            // End game if 3 teams finished, or if only 1 team is left active (and they already finished questions?)
+            // Instructions: "continues untill 3 teams reach at 100"
+            if (finishedTeamsCount >= 3 || activeTeamsCount === 0) {
                 endGame(updated);
                 return;
             }
 
-            // Update question count for team
-            const updatedCounts = { ...questionsAnsweredPerTeam };
-            updatedCounts[team.id] = (updatedCounts[team.id] || 0) + 1;
-            setQuestionsAnsweredPerTeam(updatedCounts);
-
-            // Check if all teams finished 5 questions
-            const allFinished = updated.every(t => (updatedCounts[t.id] || 0) >= QUESTIONS_PER_ROUND);
-            if (allFinished) {
-                endGame(updated);
-                return;
-            }
-
-            // Find next team with questions left
+            // Find next team that hasn't finished
             let nextIndex = (currentTeamIndex + 1) % updated.length;
-            while ((updatedCounts[updated[nextIndex].id] || 0) >= QUESTIONS_PER_ROUND) {
+            let checks = 0;
+            while ((updated[nextIndex].position || 0) >= 100 && checks < updated.length) {
                 nextIndex = (nextIndex + 1) % updated.length;
+                checks++;
             }
 
             setCurrentTeamIndex(nextIndex);
@@ -391,7 +395,7 @@ export default function RoundTwo() {
                                                 <h2 className={`text-5xl font-black ${isCorrect ? 'text-green-400' : 'text-red-400'}`}>
                                                     {isCorrect ? 'VERIFIED' : 'FAILED'}
                                                 </h2>
-                                                <p className="text-lg font-bold text-white/50 mt-2 uppercase tracking-widest">{isCorrect ? `Advance ${diceValue} Units` : 'No Movement'}</p>
+                                                <p className="text-lg font-bold text-white/50 mt-2 uppercase tracking-widest">{isCorrect ? `Move forward ${pointsAwarded} units` : 'XP Penalty applied (-1)'}</p>
                                             </div>
                                             <button onClick={proceedWithMove} className="button-premium px-10 py-5 text-xl flex items-center gap-3 mt-4">
                                                 PROCEED <ChevronRight />

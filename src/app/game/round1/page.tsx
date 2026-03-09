@@ -108,7 +108,7 @@ export default function RoundOne() {
     }, [currentQuestionIndex, questions.length, showResult]);
 
     const currentTeam = teams[currentTeamIndex];
-    const question = questions[currentQuestionIndex];
+    const question = questions[currentQuestionIndex % questions.length];
 
     const handleTimeOut = () => {
         setTimerActive(false);
@@ -241,13 +241,16 @@ export default function RoundOne() {
     };
 
     const endRound1 = () => {
+        // Sync teams from latest state
         const saved = localStorage.getItem("ladder-session");
         if (saved) {
             const data = JSON.parse(saved);
             data.teams = teams;
-            data.status = "ROUND1_COMPLETE"; // Modified state for intermediate leaderboard
+            data.status = "ROUND1_COMPLETE";
             localStorage.setItem("ladder-session", JSON.stringify(data));
         }
+
+        // Navigate
         router.push("/game/leaderboard");
     };
 
