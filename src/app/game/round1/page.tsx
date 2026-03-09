@@ -114,8 +114,8 @@ export default function RoundOne() {
         setTimerActive(false);
         setShowResult(true);
         setIsCorrect(false);
-        setPointsAwarded(-1); // Negative marking for timeout
-        applyScoreAndMove(-1, -1);
+        setPointsAwarded(-1); // Penalty for timeout
+        applyScoreAndMove(-1, -1); // Move back for timeout
     };
 
     const handleAnswer = (option: string) => {
@@ -128,26 +128,24 @@ export default function RoundOne() {
         setIsCorrect(correct);
 
         let pts = 0;
-        if (correct) {
-            if (timeTaken <= 10) pts = 10;
-            else if (timeTaken <= 20) pts = 6;
-            else pts = 3;
-        } else {
-            pts = -1; // Negative marking
-        }
-
-        setPointsAwarded(pts);
-
-        // Board Movement Logic
         let steps = 0;
         if (correct) {
-            if (timeTaken <= 10) steps = 3;
-            else if (timeTaken <= 20) steps = 2;
-            else steps = 1;
+            if (timeTaken <= 10) {
+                pts = 10;
+                steps = 10;
+            } else if (timeTaken <= 20) {
+                pts = 6;
+                steps = 6;
+            } else {
+                pts = 3;
+                steps = 3;
+            }
         } else {
+            pts = -1; // Penalty for incorrect answer
             steps = -1;
         }
 
+        setPointsAwarded(pts);
         applyScoreAndMove(pts, steps);
         setShowResult(true);
     };
@@ -379,7 +377,7 @@ export default function RoundOne() {
                                         <h2 className={`text-6xl font-black tracking-tighter ${isCorrect ? 'text-green-400' : 'text-red-400'}`}>
                                             {isCorrect ? 'VERIFIED' : 'FAILED'}
                                         </h2>
-                                        <p className="text-2xl font-bold text-white/60 mt-2 uppercase tracking-widest">{pointsAwarded > 0 ? `+${pointsAwarded} Bonus Points` : `${pointsAwarded} Point Penalty`}</p>
+                                        <p className="text-2xl font-bold text-white/60 mt-2 uppercase tracking-widest">{pointsAwarded > 0 ? `+${pointsAwarded} Bonus Points` : `${pointsAwarded} XP Penalty`}</p>
                                     </div>
                                     <button onClick={nextTurn} className="button-premium px-12 py-6 text-2xl flex items-center gap-4 group">
                                         PROCEED <ChevronRight className="group-hover:translate-x-2 transition-transform" />
@@ -409,7 +407,7 @@ export default function RoundOne() {
                         <Trophy size={80} className="mx-auto text-accent-gold" />
                         <div className="space-y-4">
                             <h2 className="text-5xl font-black tracking-tighter uppercase italic">Expedition Round 1</h2>
-                            <p className="text-zinc-400 font-medium">5 Questions per team. 10/6/3 XP Based on speed. Correct answers advance your position on the board.</p>
+                            <p className="text-zinc-400 font-medium">5 Questions per team. 10/6/3 XP & Board Position based on speed. Incorrect answers or timeouts result in -1 XP and -1 position penalty.</p>
                         </div>
                         <button onClick={startRound} className="button-premium px-12 py-5 text-xl flex items-center gap-3 mx-auto">
                             <Play size={24} fill="currentColor" /> BEGIN EXPEDITION
