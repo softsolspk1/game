@@ -1,21 +1,24 @@
 export const SNAKES_AND_LADDERS: Record<number, number> = {
-    // Ladders (Matching visual board)
+    // Ladders (Matching zigzag layout precisely)
     4: 17,
-    8: 30,
+    9: 29,
     18: 38,
-    24: 57,
+    24: 46,
     35: 64,
     50: 91,
+    56: 85,
+    73: 88,
     77: 97,
     82: 100,
-    // Snakes (Matching visual board)
+    // Snakes (Matching zigzag layout precisely)
     16: 6,
     41: 3,
     54: 32,
-    60: 22,
+    60: 19,
     67: 7,
-    88: 73,
-    93: 88,
+    86: 36,
+    93: 73,
+    95: 75,
     98: 84,
     99: 77
 };

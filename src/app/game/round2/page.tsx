@@ -49,12 +49,12 @@ export default function RoundTwo() {
 
     // Audio helpers
     const playCorrect = () => {
-        const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2012/2012-preview.mp3");
+        const audio = new Audio("https://www.soundjay.com/human/applause-01.mp3");
         audio.play().catch(e => console.warn("Audio play blocked", e));
     };
 
     const playWrong = () => {
-        const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3");
+        const audio = new Audio("https://www.soundjay.com/button/button-10.mp3");
         audio.play().catch(e => console.warn("Audio play blocked", e));
     };
 
