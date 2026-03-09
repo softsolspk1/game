@@ -1,7 +1,8 @@
 export const SNAKES_AND_LADDERS: Record<number, number> = {
     // Ladders (Matching zigzag layout precisely)
     4: 17,
-    9: 29,
+    8: 30, // Also a ladder on 8
+    9: 30, // Ladder on 9 leads to 30
     18: 38,
     24: 46,
     35: 64,

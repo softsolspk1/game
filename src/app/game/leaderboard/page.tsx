@@ -28,8 +28,14 @@ export default function Leaderboard() {
             const currentStatus = data.status || "";
             setGameStatus(currentStatus);
 
+            // Consolidate positions for display and board
+            const loadedTeams = (data.teams || []).map((t: Team) => ({
+                ...t,
+                displayPosition: t.positionRound2 || t.position || 1
+            }));
+
             // Sort primarily by finishedRank (1, 2, 3), then totalScore
-            const sorted = (data.teams || []).sort((a: Team, b: Team) => {
+            const sorted = loadedTeams.sort((a: Team, b: Team) => {
                 const rankA = a.finishedRank || 999;
                 const rankB = b.finishedRank || 999;
                 if (rankA !== rankB) return rankA - rankB;
@@ -79,7 +85,7 @@ export default function Leaderboard() {
                         <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">The Path Taken</h3>
                     </div>
                     <GameBoard
-                        teams={teams.map(t => ({ id: t.id, name: t.name, color: t.color, position: t.positionRound2 || t.position || 1 }))}
+                        teams={teams.map(t => ({ id: t.id, name: t.name, color: t.color, position: (t as any).displayPosition }))}
                         containerClassName="h-full w-full max-h-full aspect-square p-2"
                     />
                 </div>
@@ -117,7 +123,7 @@ export default function Leaderboard() {
                                         <div>
                                             <h4 className="text-lg font-bold leading-tight" style={{ color: team.color }}>{team.name}</h4>
                                             <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-tighter">
-                                                {team.finishedRank ? `Rank: ${team.finishedRank} • Finished` : `Pos: ${team.positionRound2 || team.position || 1} • In Progress`} • XP: {team.totalScore}
+                                                {team.finishedRank ? `Rank: ${team.finishedRank} • Finished` : `Pos: ${(team as any).displayPosition} • In Progress`} • XP: {team.totalScore}
                                             </p>
                                         </div>
                                     </div>
