@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Dices, Trophy, ChevronRight, CheckCircle2, XCircle, HelpCircle, FastForward, Users, Play } from "lucide-react";
 import GameBoard from "@/components/GameBoard";
@@ -47,15 +47,27 @@ export default function RoundTwo() {
     const [pointsAwarded, setPointsAwarded] = useState(0);
     const [startTime, setStartTime] = useState(0);
 
-    // Audio helpers
+    // Audio refs
+    const correctAudio = useRef<HTMLAudioElement | null>(null);
+    const wrongAudio = useRef<HTMLAudioElement | null>(null);
+
+    useEffect(() => {
+        correctAudio.current = new Audio("https://www.soundjay.com/human/applause-01.mp3");
+        wrongAudio.current = new Audio("https://www.soundjay.com/button/button-10.mp3");
+    }, []);
+
     const playCorrect = () => {
-        const audio = new Audio("https://www.soundjay.com/human/applause-01.mp3");
-        audio.play().catch(e => console.warn("Audio play blocked", e));
+        if (correctAudio.current) {
+            correctAudio.current.currentTime = 0;
+            correctAudio.current.play().catch((e: Error) => console.warn("Audio play blocked", e));
+        }
     };
 
     const playWrong = () => {
-        const audio = new Audio("https://www.soundjay.com/button/button-10.mp3");
-        audio.play().catch(e => console.warn("Audio play blocked", e));
+        if (wrongAudio.current) {
+            wrongAudio.current.currentTime = 0;
+            wrongAudio.current.play().catch((e: Error) => console.warn("Audio play blocked", e));
+        }
     };
 
     const [isRoundStarted, setIsRoundStarted] = useState(false);
