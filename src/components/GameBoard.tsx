@@ -64,12 +64,18 @@ export default function GameBoard({ teams, containerClassName }: GameBoardProps)
                                     {teams.filter(t => t.position === num).map(t => (
                                         <div
                                             key={t.id}
-                                            className="w-5 h-5 rounded-full border-2 border-white shadow-[0_0_15px_rgba(255,255,255,0.8)] animate-float pointer-events-auto"
+                                            className="w-8 h-8 rounded-full border-2 border-white shadow-[0_0_20px_rgba(255,255,255,1)] animate-float pointer-events-auto flex items-center justify-center relative overflow-hidden group/piece"
                                             style={{
                                                 backgroundColor: t.color,
-                                                boxShadow: `0 0 20px ${t.color}`,
+                                                boxShadow: `0 0 30px ${t.color}`,
+                                                zIndex: 100 + t.id
                                             }}
-                                        />
+                                        >
+                                            {/* Inner Gloss */}
+                                            <div className="absolute inset-0 bg-gradient-to-tr from-white/30 to-transparent" />
+                                            {/* Team Initials or ID if more than one piece on same square could be added here, but keep it simple for now as requested */}
+                                            <div className="absolute -inset-1 bg-white/20 blur-sm opacity-0 group-hover/piece:opacity-100 transition-opacity" />
+                                        </div>
                                     ))}
                                 </div>
                             </div>

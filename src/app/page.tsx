@@ -15,79 +15,106 @@ export default function Home() {
 
   if (!verified) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-12 text-center animate-in fade-in duration-1000">
-        <div className="space-y-4">
-          <ShieldCheck size={64} className="text-accent-gold mx-auto mb-4 animate-float" />
-          <h1 className="text-4xl md:text-5xl font-black text-gradient-gold">Professional Access Required</h1>
-          <p className="max-w-xl text-zinc-400 leading-relaxed mx-auto italic">
-            "This educational experience is designed for registered medical professionals only.
-            Clinical scenarios are simulated for learning purposes and do not replace clinical judgment."
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-12 text-center animate-in fade-in duration-1000 relative overflow-hidden">
+        {/* Subtle Background Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent-magenta/5 blur-[120px] rounded-full pointer-events-none" />
+
+        <div className="space-y-6 relative z-10">
+          <div className="relative inline-block">
+            <ShieldCheck size={80} className="text-accent-gold mx-auto mb-4 animate-float" />
+            <div className="absolute inset-0 bg-accent-gold/20 blur-2xl rounded-full scale-150 -z-10 animate-pulse" />
+          </div>
+          <h1 className="text-5xl md:text-6xl font-black text-gradient-gold tracking-tight italic">
+            Professional Authorization
+          </h1>
+          <p className="max-w-2xl text-zinc-400 leading-relaxed mx-auto text-lg font-light">
+            "This educational experience is <span className="text-white font-medium">exclusive to registered medical professionals</span>.
+            Clinical scenarios are simulated for advanced medical learning and do not supersede professional clinical judgment."
           </p>
         </div>
 
         <button
           onClick={() => setVerified(true)}
-          className="button-premium px-16 py-4 text-xl"
+          className="button-premium px-24 py-6 text-2xl group"
         >
-          ENTER EXPERIENCE
+          <span>ENTER EXPERIENCE</span>
+          <ChevronRight size={24} className="group-hover:translate-x-2 transition-transform" />
         </button>
 
-        <div className="text-[10px] text-zinc-500 uppercase tracking-[0.5em] font-black opacity-30">
-          Secure Professional Gateway
+        <div className="flex items-center gap-4 opacity-50">
+          <div className="h-px w-12 bg-white/20" />
+          <div className="text-[10px] text-zinc-500 uppercase tracking-[1em] font-black">
+            Secured Gateway
+          </div>
+          <div className="h-px w-12 bg-white/20" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-16 text-center animate-in fade-in slide-in-from-bottom-8 duration-700">
-      <div className="space-y-4 relative">
-        <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-accent-gold to-transparent opacity-50" />
-        <h1 className="text-7xl md:text-9xl font-extrabold tracking-tighter text-gradient-gold female-glow">
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-20 text-center animate-in fade-in slide-in-from-bottom-8 duration-700 relative">
+      <div className="space-y-6 relative">
+        <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-64 h-1.5 bg-gradient-to-r from-transparent via-accent-gold to-transparent opacity-60 rounded-full" />
+        <h1 className="text-8xl md:text-11xl font-black tracking-tighter text-gradient-gold female-glow italic uppercase leading-none">
           DUFOGEN
         </h1>
-        <h2 className="text-xl md:text-2xl font-light tracking-[0.4em] text-accent-pink uppercase pl-4">
-          Ladder & Snake Expedition
-        </h2>
+        <div className="flex flex-col gap-2">
+          <h2 className="text-2xl md:text-3xl font-extralight tracking-[0.5em] text-accent-pink uppercase pl-4">
+            Ladder & Snake Expedition
+          </h2>
+          <div className="h-px w-48 bg-gradient-to-r from-transparent via-accent-pink/50 to-transparent mx-auto mt-2" />
+        </div>
       </div>
 
-      <div className="glass p-10 md:p-16 max-w-3xl w-full flex flex-col gap-12 glow-magenta relative overflow-hidden group">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent-magenta to-accent-gold opacity-30" />
+      <div className="glass p-12 md:p-20 max-w-4xl w-full flex flex-col gap-16 glow-magenta relative overflow-hidden group border-t-2 border-white/5">
+        {/* Animated Highlight */}
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-accent-magenta/10 blur-3xl rounded-full group-hover:bg-accent-magenta/20 transition-all duration-700" />
 
-        <div className="space-y-2">
-          <h3 className="text-2xl font-semibold tracking-tight">Select Participant Teams</h3>
-          <p className="text-zinc-400 text-sm">Organize medical teams for this clinical simulation</p>
+        <div className="space-y-3 relative z-10">
+          <h3 className="text-3xl font-bold tracking-tight text-white flex items-center justify-center gap-4">
+            <Users size={28} className="text-accent-pink" />
+            Select Participant Teams
+          </h3>
+          <p className="text-zinc-400 text-lg font-light italic">Organize professional medical teams for this clinical journey</p>
         </div>
 
-        <div className="flex justify-center gap-6 md:gap-10">
+        <div className="flex justify-center gap-8 md:gap-12 relative z-10">
           {[2, 3, 4].map((count) => (
             <button
               key={count}
               onClick={() => setPlayerCount(count)}
-              className={`group relative w-16 h-16 md:w-24 md:h-24 rounded-2xl flex flex-col items-center justify-center transition-all duration-500 border overflow-hidden ${playerCount === count
-                ? "border-accent-gold bg-accent-magenta/20 glow-gold scale-110"
-                : "border-glass-border hover:border-accent-pink/40 bg-zinc-900/40"
+              className={`group relative w-20 h-20 md:w-28 md:h-28 rounded-3xl flex flex-col items-center justify-center transition-all duration-500 border-2 overflow-hidden ${playerCount === count
+                ? "border-accent-gold bg-accent-magenta/20 scale-110 shadow-[0_0_40px_rgba(251,191,36,0.2)]"
+                : "border-white/5 hover:border-accent-pink/30 bg-white/5"
                 }`}
             >
-              <Users size={32} className={`transition-colors duration-300 ${playerCount === count ? "text-accent-gold" : "text-zinc-500 group-hover:text-zinc-300"}`} />
-              <span className={`text-[10px] mt-2 font-black tracking-widest ${playerCount === count ? "text-accent-gold" : "text-zinc-600"}`}>
+              <div className={`absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity`} />
+              <Users size={36} className={`transition-all duration-300 relative z-10 ${playerCount === count ? "text-accent-gold scale-110" : "text-zinc-600 group-hover:text-zinc-300"}`} />
+              <span className={`text-[11px] mt-3 font-black tracking-widest relative z-10 ${playerCount === count ? "text-accent-gold" : "text-zinc-500"}`}>
                 {count} TEAMS
               </span>
+
+              {playerCount === count && (
+                <div className="absolute top-0 left-0 w-full h-1 bg-accent-gold animate-progress" />
+              )}
             </button>
           ))}
         </div>
 
         <button
           onClick={handleStart}
-          className="button-premium w-full max-w-sm mx-auto flex items-center justify-center gap-4 text-lg"
+          className="button-premium w-full max-w-md mx-auto flex items-center justify-center gap-6 text-2xl py-6 rounded-2xl group shadow-2xl relative z-10"
         >
-          <span>INITIATE CASE STUDY</span>
-          <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+          <span className="italic font-black tracking-widest">INITIATE CASE STUDY</span>
+          <div className="p-1 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors">
+            <ChevronRight size={28} className="group-hover:translate-x-2 transition-transform" />
+          </div>
         </button>
       </div>
 
-      <div className="max-w-xl mx-auto space-y-4 pt-12">
-        <p className="text-zinc-500 text-xs font-bold tracking-[0.2em] uppercase">
+      <div className="max-w-xl mx-auto space-y-6 pt-16 relative">
+        <p className="text-zinc-500 text-sm font-black tracking-[0.4em] uppercase italic opacity-40">
           Evidence-Based Journey to Stability
         </p>
       </div>

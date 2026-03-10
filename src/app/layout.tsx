@@ -46,22 +46,33 @@ export default function RootLayout({
           </div>
         </main>
 
-        <footer className="glass border-t border-white/5 py-4 px-8 flex justify-between items-center bg-black/50 relative z-40">
-          <div className="flex items-center gap-4">
+        <footer className="glass border-t border-white/10 py-6 px-12 flex flex-col md:flex-row justify-between items-center bg-black/60 relative z-40 gap-4">
+          <div className="flex items-center gap-6">
             <Image
               src="/martindowlogo.png"
               alt="Martindow Logo"
-              width={100}
-              height={32}
-              className="img-contain"
+              width={120}
+              height={38}
+              className="img-contain opacity-80 hover:opacity-100 transition-opacity"
             />
-            <div className="hidden sm:block text-[9px] text-zinc-500 uppercase tracking-tighter">
-              Creating Distinction for Life
+            <div className="hidden sm:block">
+              <div className="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">
+                Creating Distinction for Life
+              </div>
+              <div className="text-[9px] text-zinc-600 uppercase tracking-[0.2em]">
+                Scientific Innovation Group
+              </div>
             </div>
           </div>
-          <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">
-            © 2026 DUFOGEN CLINICAL PATHWAYS
-          </p>
+
+          <div className="flex flex-col items-center md:items-end gap-1">
+            <p className="text-[10px] text-zinc-400 font-black uppercase tracking-[0.3em]">
+              © 2026 DUFOGEN CLINICAL PATHWAYS
+            </p>
+            <p className="text-[11px] font-bold text-gradient-gold tracking-wider">
+              Developed by Softsols - Digital AI Solution
+            </p>
+          </div>
         </footer>
       </body>
     </html>
