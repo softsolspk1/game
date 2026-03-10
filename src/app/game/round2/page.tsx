@@ -54,9 +54,9 @@ export default function RoundTwo() {
     const rollAudio = useRef<HTMLAudioElement | null>(null);
 
     useEffect(() => {
-        correctAudio.current = new Audio("https://www.soundjay.com/human/applause-01.mp3");
-        wrongAudio.current = new Audio("https://www.soundjay.com/button/button-10.mp3");
-        rollAudio.current = new Audio("https://www.soundjay.com/misc/sounds/dice-roll-1.mp3");
+        correctAudio.current = new Audio("https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3");
+        wrongAudio.current = new Audio("https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3");
+        rollAudio.current = new Audio("https://assets.mixkit.co/active_storage/sfx/2006/2006-preview.mp3");
     }, []);
 
     const playCorrect = () => {
@@ -274,7 +274,7 @@ export default function RoundTwo() {
     if (!currentTeam) return <div className="min-h-screen grid place-items-center">Loading...</div>;
 
     return (
-        <div className="flex flex-col h-screen max-h-screen overflow-hidden bg-[#0f172a] text-white">
+        <div className="flex flex-col h-full overflow-hidden bg-[#0f172a] text-white">
             {/* Top Bar - Compact HUD */}
             <div className="flex justify-between items-center glass p-4 shrink-0 mx-6 mt-6 rounded-[2rem] border-b-2 border-white/5 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-accent-magenta/5 via-transparent to-accent-gold/5" />
@@ -331,7 +331,7 @@ export default function RoundTwo() {
                     </div>
                     <GameBoard
                         teams={teams.map(t => ({ id: t.id, name: t.name, color: t.color, position: t.position || 0 }))}
-                        containerClassName="h-[90%] w-[90%] max-h-full aspect-square"
+                        containerClassName="h-full aspect-square"
                     />
                 </div>
 
@@ -354,16 +354,14 @@ export default function RoundTwo() {
                                 <div className="dice-container relative group cursor-pointer" onClick={isDiceDetermined ? initiateQuestionPhase : rollDice}>
                                     <div className={`absolute inset-0 blur-[80px] rounded-full scale-150 opacity-20 transition-all duration-1000 ${isRolling ? 'animate-pulse' : ''}`} style={{ backgroundColor: currentTeam.color }} />
 
-                                    <div className={`dice-3d ${isRolling ? 'animate-dice-roll' : ''} ${isDiceDetermined ? 'scale-110' : 'group-hover:scale-105'}`}>
-                                        <div className={`dice-face face-${diceValue}`} style={{ borderColor: currentTeam.color }}>
-                                            {[...Array(diceValue)].map((_, i) => <div key={i} className="dot" style={{ backgroundColor: currentTeam.color }} />)}
-                                        </div>
-                                        {/* Back/Side faces for 3D effect */}
-                                        <div className="dice-face face-2 opacity-20" style={{ transform: 'rotateY(180deg) translateZ(70px)' }} />
-                                        <div className="dice-face face-3 opacity-20" style={{ transform: 'rotateY(90deg) translateZ(70px)' }} />
-                                        <div className="dice-face face-4 opacity-20" style={{ transform: 'rotateY(-90deg) translateZ(70px)' }} />
-                                        <div className="dice-face face-5 opacity-20" style={{ transform: 'rotateX(90deg) translateZ(70px)' }} />
-                                        <div className="dice-face face-6 opacity-20" style={{ transform: 'rotateX(-90deg) translateZ(70px)' }} />
+                                    <div className={`dice-3d ${isRolling ? 'animate-dice-roll' : ''} ${isDiceDetermined ? 'scale-125' : 'group-hover:scale-110'}`}>
+                                        {[1, 2, 3, 4, 5, 6].map((val) => (
+                                            <div key={val} className={`dice-face face-${val}`} style={{ borderColor: currentTeam.color }}>
+                                                {[...Array(val)].map((_, i) => (
+                                                    <div key={i} className="dot" style={{ backgroundColor: currentTeam.color }} />
+                                                ))}
+                                            </div>
+                                        ))}
                                     </div>
 
                                     {isDiceDetermined && (

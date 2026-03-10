@@ -112,9 +112,9 @@ export default function RoundOne() {
     const tickAudio = useRef<HTMLAudioElement | null>(null);
 
     useEffect(() => {
-        correctAudio.current = new Audio("https://www.soundjay.com/human/applause-01.mp3");
-        wrongAudio.current = new Audio("https://www.soundjay.com/button/button-10.mp3");
-        tickAudio.current = new Audio("https://www.soundjay.com/clock/clock-ticking-2.mp3");
+        correctAudio.current = new Audio("https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3");
+        wrongAudio.current = new Audio("https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3");
+        tickAudio.current = new Audio("https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3");
     }, []);
 
     const playCorrect = () => {
@@ -296,7 +296,7 @@ export default function RoundOne() {
     }
 
     return (
-        <div className="flex flex-col h-screen max-h-screen overflow-hidden bg-[#0f172a] text-white">
+        <div className="flex flex-col h-full overflow-hidden bg-[#0f172a] text-white">
 
             {/* Top Bar - Compact */}
             <div className="flex justify-between items-center glass p-4 shrink-0 mx-6 mt-6 rounded-[2rem] border-b-2 border-white/5 relative overflow-hidden">
@@ -363,7 +363,7 @@ export default function RoundOne() {
                     </div>
                     <GameBoard
                         teams={teams.map(t => ({ id: t.id, name: t.name, color: t.color, position: t.position || 0 }))}
-                        containerClassName="h-[90%] w-[90%] max-h-full aspect-square"
+                        containerClassName="h-full aspect-square"
                     />
                 </div>
 

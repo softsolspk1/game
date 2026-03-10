@@ -50,7 +50,7 @@ export default function Leaderboard() {
     const winner = teams[0];
 
     return (
-        <div className="flex flex-col h-screen max-h-screen overflow-hidden bg-[#0f172a] text-white">
+        <div className="flex flex-col h-full overflow-hidden bg-[#0f172a] text-white">
 
             {/* Top Bar */}
             <div className="flex justify-between items-center glass p-5 shrink-0 mx-6 mt-6 rounded-[2rem] border-b-2 border-white/5 relative overflow-hidden">
