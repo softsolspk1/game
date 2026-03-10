@@ -354,7 +354,19 @@ export default function RoundTwo() {
                                 <div className="dice-container relative group cursor-pointer" onClick={isDiceDetermined ? initiateQuestionPhase : rollDice}>
                                     <div className={`absolute inset-0 blur-[80px] rounded-full scale-150 opacity-20 transition-all duration-1000 ${isRolling ? 'animate-pulse' : ''}`} style={{ backgroundColor: currentTeam.color }} />
 
-                                    <div className={`dice-3d ${isRolling ? 'animate-dice-roll' : ''} ${isDiceDetermined ? 'scale-125' : 'group-hover:scale-110'}`}>
+                                    <div
+                                        className={`dice-3d ${isRolling ? 'animate-dice-roll' : ''} ${isDiceDetermined ? 'scale-125' : 'group-hover:scale-110'}`}
+                                        style={{
+                                            transform: !isRolling && isDiceDetermined ? {
+                                                1: 'rotateX(0deg) rotateY(0deg)',
+                                                2: 'rotateY(-180deg)',
+                                                3: 'rotateY(-90deg)',
+                                                4: 'rotateY(90deg)',
+                                                5: 'rotateX(-90deg)',
+                                                6: 'rotateX(90deg)',
+                                            }[diceValue] : undefined
+                                        }}
+                                    >
                                         {[1, 2, 3, 4, 5, 6].map((val) => (
                                             <div key={val} className={`dice-face face-${val}`} style={{ borderColor: currentTeam.color }}>
                                                 {[...Array(val)].map((_, i) => (
