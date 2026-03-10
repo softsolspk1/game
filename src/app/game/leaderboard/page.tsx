@@ -105,61 +105,51 @@ export default function Leaderboard() {
                 </div>
 
                 {/* Right Side: Champions & Standings */}
-                <div className="flex-[2] flex flex-col gap-8 overflow-y-auto custom-scrollbar">
+                <div className="flex-[2] flex flex-col gap-4 overflow-y-auto custom-scrollbar">
 
                     {/* Top Spot / Winner */}
-                    <div className="glass p-12 relative overflow-hidden shrink-0 flex flex-col items-center text-center border-b-[8px] rounded-[2.5rem] bg-black/40 shadow-2xl" style={{ borderColor: winner.color }}>
+                    <div className="glass p-6 relative overflow-hidden shrink-0 flex flex-col items-center text-center border-b-[6px] rounded-[2rem] bg-black/40 shadow-xl" style={{ borderColor: winner.color }}>
                         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-accent-gold/10 blur-[100px] rounded-full pointer-events-none" />
-
-                        <Trophy size={80} className="text-accent-gold mb-6 drop-shadow-[0_0_30px_rgba(212,175,55,0.6)] animate-float" />
-
-                        <div className="space-y-4 relative z-10">
-                            <span className="text-[11px] font-black uppercase tracking-[0.6em] text-accent-gold opacity-80 block mb-2">Grand Champion</span>
-                            <h2 className="text-6xl font-black female-glow italic uppercase tracking-tighter" style={{ color: winner.color }}>
+                        <Trophy size={48} className="text-accent-gold mb-3 drop-shadow-[0_0_20px_rgba(212,175,55,0.4)] animate-float" />
+                        <div className="space-y-1 relative z-10">
+                            <span className="text-[9px] font-black uppercase tracking-[0.4em] text-accent-gold opacity-80 block">Grand Champion</span>
+                            <h2 className="text-4xl font-black female-glow italic uppercase tracking-tighter" style={{ color: winner.color }}>
                                 {winner.name}
                             </h2>
-                            <div className="flex items-center justify-center gap-4 mt-6">
-                                <div className="h-px w-8 bg-white/10" />
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-5xl font-black text-white italic tracking-tighter">{winner.totalScore}</span>
-                                    <span className="text-xs font-black text-zinc-600 uppercase tracking-widest leading-none pr-1">Total XP</span>
+                            <div className="flex items-center justify-center gap-3">
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-3xl font-black text-white italic tracking-tighter">{winner.totalScore}</span>
+                                    <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">XP</span>
                                 </div>
-                                <div className="h-px w-8 bg-white/10" />
                             </div>
                         </div>
                     </div>
 
                     {/* Full Standings List */}
-                    <div className="glass p-10 flex-1 flex flex-col overflow-hidden rounded-[2.5rem] bg-black/30 border-white/5 shadow-xl">
-                        <div className="flex justify-between items-center mb-10 pb-4 border-b border-white/10">
-                            <h3 className="text-xs font-black uppercase tracking-[0.5em] text-zinc-500 italic">Historical Standings</h3>
-                            <Medal size={16} className="text-zinc-600" />
+                    <div className="glass p-6 flex-1 flex flex-col overflow-hidden rounded-[2rem] bg-black/30 border-white/5 shadow-lg">
+                        <div className="flex justify-between items-center mb-6 pb-2 border-b border-white/10">
+                            <h3 className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-500 italic">Historical Standings</h3>
+                            <Medal size={14} className="text-zinc-600" />
                         </div>
 
-                        <div className="space-y-4 overflow-y-auto pr-3 custom-scrollbar flex-1 mb-4">
+                        <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-1">
                             {teams.map((team, index) => (
                                 <div
                                     key={team.id}
-                                    className={`flex items-center justify-between p-6 rounded-[1.5rem] border transition-all duration-500 group ${index === 0 ? 'bg-white/10 border-white/20 shadow-lg scale-[1.02] -translate-y-1' : 'bg-black/20 border-white/5 hover:bg-white/5 hover:border-white/10'}`}
+                                    className={`flex items-center justify-between p-4 rounded-2xl border transition-all duration-500 group ${index === 0 ? 'bg-white/10 border-white/20 shadow-md transform scale-[1.01]' : 'bg-black/20 border-white/5 hover:bg-white/5'}`}
                                 >
-                                    <div className="flex items-center gap-6">
-                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl shadow-inner relative overflow-hidden group-hover:rotate-6 transition-transform`} style={{ backgroundColor: team.color, color: 'white' }}>
-                                            <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent" />
-                                            <span className="relative z-10">{index + 1}</span>
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg shadow-inner`} style={{ backgroundColor: team.color, color: 'white' }}>
+                                            {index + 1}
                                         </div>
-                                        <div className="space-y-1">
-                                            <h4 className="text-2xl font-black italic tracking-tight" style={{ color: team.color }}>{team.name}</h4>
-                                            <div className="flex items-center gap-2">
-                                                <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest italic leading-none">
-                                                    {team.finishedRank ? `Rank: ${team.finishedRank} • Synchronized` : `Pos: ${(team as any).displayPosition} • Active`}
-                                                </p>
-                                                <div className="w-1 h-1 rounded-full bg-zinc-700" />
-                                                <span className="text-[10px] text-zinc-400 font-black uppercase tracking-widest">{team.totalScore} XP</span>
-                                            </div>
+                                        <div className="space-y-0.5">
+                                            <h4 className="text-lg font-black italic tracking-tight" style={{ color: team.color }}>{team.name}</h4>
+                                            <p className="text-[8px] text-zinc-500 font-black uppercase tracking-widest italic leading-none">
+                                                {team.finishedRank ? `Rank: ${team.finishedRank}` : `Pos: ${(team as any).displayPosition}`}
+                                            </p>
                                         </div>
                                     </div>
-                                    <div className="text-4xl font-black italic tracking-tighter text-white/90">
+                                    <div className="text-2xl font-black italic tracking-tighter text-white/90">
                                         {team.totalScore}
                                     </div>
                                 </div>
@@ -168,23 +158,14 @@ export default function Leaderboard() {
 
                         {/* Prominent Proceed Button for Round 1 End */}
                         {gameStatus === "ROUND1_COMPLETE" && (
-                            <div className="mt-6 pt-8 border-t border-white/10 relative z-10">
+                            <div className="mt-4 pt-4 border-t border-white/10 shrink-0">
                                 <button
                                     onClick={() => router.push("/game/round2")}
-                                    className="button-premium w-full py-8 text-2xl flex items-center justify-center gap-6 animate-pulse group rounded-3xl shadow-gold/10"
+                                    className="button-premium w-full py-5 text-xl flex items-center justify-center gap-4 animate-pulse group rounded-2xl"
                                 >
-                                    <span className="font-black tracking-[0.1em] uppercase italic">Initiate Phase 02 Sequence</span>
-                                    <div className="p-1 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors">
-                                        <ChevronRight size={32} className="group-hover:translate-x-3 transition-transform" />
-                                    </div>
+                                    <span className="font-black tracking-[0.1em] uppercase italic text-sm">Initiate Phase 02</span>
+                                    <ChevronRight size={24} className="group-hover:translate-x-2 transition-transform" />
                                 </button>
-                                <div className="flex items-center gap-3 justify-center mt-6 opacity-30">
-                                    <Star size={12} className="text-accent-gold" />
-                                    <p className="text-[10px] text-zinc-500 font-black text-center tracking-[0.5em] uppercase italic">
-                                        Global Synchronization Complete
-                                    </p>
-                                    <Star size={12} className="text-accent-gold" />
-                                </div>
                             </div>
                         )}
                     </div>

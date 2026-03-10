@@ -89,10 +89,19 @@ export default function RoundOne() {
         let interval: NodeJS.Timeout;
         if (timerActive && timeLeft > 0) {
             interval = setInterval(() => {
-                setTimeLeft((prev) => prev - 1);
+                setTimeLeft((prev) => {
+                    if (prev === 1) {
+                        setTimerActive(false);
+                        handleTimeOut();
+                        return 0;
+                    }
+                    if (tickAudio.current) {
+                        tickAudio.current.currentTime = 0;
+                        tickAudio.current.play().catch(() => { });
+                    }
+                    return prev - 1;
+                });
             }, 1000);
-        } else if (timeLeft === 0 && timerActive) {
-            handleTimeOut();
         }
         return () => clearInterval(interval);
     }, [timerActive, timeLeft]);
@@ -100,10 +109,12 @@ export default function RoundOne() {
     // Audio refs for more reliable playback
     const correctAudio = useRef<HTMLAudioElement | null>(null);
     const wrongAudio = useRef<HTMLAudioElement | null>(null);
+    const tickAudio = useRef<HTMLAudioElement | null>(null);
 
     useEffect(() => {
         correctAudio.current = new Audio("https://www.soundjay.com/human/applause-01.mp3");
         wrongAudio.current = new Audio("https://www.soundjay.com/button/button-10.mp3");
+        tickAudio.current = new Audio("https://www.soundjay.com/clock/clock-ticking-2.mp3");
     }, []);
 
     const playCorrect = () => {
@@ -321,12 +332,16 @@ export default function RoundOne() {
                                 {questionsAnsweredPerTeam[currentTeam.id] || 0} <span className="text-zinc-600 font-light mx-0.5">/</span> {QUESTIONS_PER_ROUND}
                             </div>
                         </div>
-                        <div className="w-[1px] h-6 bg-white/10" />
-                        <div className="text-right flex flex-col items-end">
-                            <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Timer</span>
-                            <div className={`text-2xl font-black italic tracking-tighter ${timeLeft <= 10 ? 'text-red-500 animate-pulse' : 'text-accent-gold'}`}>
-                                {timeLeft}s
+                        <div className="w-[1px] h-10 bg-white/10" />
+                        <div className="text-right flex flex-col items-end min-w-[100px] relative">
+                            <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-1">Time Remaining</span>
+                            <div className={`text-4xl font-black italic tracking-tighter tabular-nums flex items-baseline gap-1 ${timeLeft <= 10 ? 'text-red-500 animate-timer-tick' : 'text-accent-gold'}`}>
+                                {timeLeft}
+                                <span className="text-xs opacity-50 not-italic ml-1">SEC</span>
                             </div>
+                            {timeLeft <= 10 && (
+                                <div className="absolute -inset-2 bg-red-500/10 blur-xl rounded-full animate-pulse" />
+                            )}
                         </div>
                     </div>
 

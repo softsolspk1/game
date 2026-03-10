@@ -46,14 +46,17 @@ export default function RoundTwo() {
     const [hiddenOptions, setHiddenOptions] = useState<string[]>([]);
     const [pointsAwarded, setPointsAwarded] = useState(0);
     const [startTime, setStartTime] = useState(0);
+    const [isDiceDetermined, setIsDiceDetermined] = useState(false);
 
     // Audio refs
     const correctAudio = useRef<HTMLAudioElement | null>(null);
     const wrongAudio = useRef<HTMLAudioElement | null>(null);
+    const rollAudio = useRef<HTMLAudioElement | null>(null);
 
     useEffect(() => {
         correctAudio.current = new Audio("https://www.soundjay.com/human/applause-01.mp3");
         wrongAudio.current = new Audio("https://www.soundjay.com/button/button-10.mp3");
+        rollAudio.current = new Audio("https://www.soundjay.com/misc/sounds/dice-roll-1.mp3");
     }, []);
 
     const playCorrect = () => {
@@ -108,32 +111,43 @@ export default function RoundTwo() {
     const currentTeam = teams[currentTeamIndex];
 
     const rollDice = () => {
-        if (isRolling) return;
+        if (isRolling || isDiceDetermined) return;
         setIsRolling(true);
+        setIsDiceDetermined(false);
+
+        if (rollAudio.current) {
+            rollAudio.current.currentTime = 0;
+            rollAudio.current.play().catch(() => { });
+        }
 
         let counter = 0;
+        const rollDuration = 20; // More rolls for "reasonable speed"
         const interval = setInterval(() => {
             const tempVal = Math.floor(Math.random() * 6) + 1;
             setDiceValue(tempVal);
             counter++;
-            if (counter > 15) {
+            if (counter > rollDuration) {
                 clearInterval(interval);
                 const finalValue = Math.floor(Math.random() * 6) + 1;
                 setDiceValue(finalValue);
                 setIsRolling(false);
-
-                // Trigger Question Phase
-                setTimeout(() => {
-                    const q = questions[Math.floor(Math.random() * questions.length)];
-                    setCurrentQuestion(q);
-                    setShowQuestion(true);
-                    setSelectedOption(null);
-                    setHiddenOptions([]);
-                    setShowResult(false);
-                    setStartTime(Date.now());
-                }, 500);
+                setIsDiceDetermined(true);
+                if (rollAudio.current) rollAudio.current.pause();
             }
-        }, 100);
+        }, 80); // Slower interval
+    };
+
+    const initiateQuestionPhase = () => {
+        if (!isDiceDetermined) return;
+
+        const q = questions[Math.floor(Math.random() * questions.length)];
+        setCurrentQuestion(q);
+        setShowQuestion(true);
+        setSelectedOption(null);
+        setHiddenOptions([]);
+        setShowResult(false);
+        setStartTime(Date.now());
+        setIsDiceDetermined(false);
     };
 
     const use5050 = () => {
@@ -337,29 +351,43 @@ export default function RoundTwo() {
                                     <p className="text-zinc-500 font-medium italic opacity-60">Establish the trajectory of your clinical journey</p>
                                 </div>
 
-                                <div className="relative group">
-                                    <div className={`absolute inset-0 blur-[60px] rounded-full scale-125 opacity-30 transition-all duration-700 ${isRolling ? 'bg-white animate-pulse' : ''}`} style={{ backgroundColor: currentTeam.color }} />
-                                    <div
-                                        className={`w-56 h-56 bg-black/60 backdrop-blur-3xl border-[12px] rounded-[3.5rem] flex items-center justify-center text-9xl font-black shadow-2xl relative z-10 transition-all duration-500 ${isRolling ? 'rotate-[360deg] scale-110' : 'group-hover:scale-105'}`}
-                                        style={{ borderColor: currentTeam.color, color: currentTeam.color, boxShadow: `0 0 50px ${currentTeam.color}40`, textShadow: `0 0 20px ${currentTeam.color}60` }}
-                                    >
-                                        {diceValue}
+                                <div className="dice-container relative group cursor-pointer" onClick={isDiceDetermined ? initiateQuestionPhase : rollDice}>
+                                    <div className={`absolute inset-0 blur-[80px] rounded-full scale-150 opacity-20 transition-all duration-1000 ${isRolling ? 'animate-pulse' : ''}`} style={{ backgroundColor: currentTeam.color }} />
+
+                                    <div className={`dice-3d ${isRolling ? 'animate-dice-roll' : ''} ${isDiceDetermined ? 'scale-110' : 'group-hover:scale-105'}`}>
+                                        <div className={`dice-face face-${diceValue}`} style={{ borderColor: currentTeam.color }}>
+                                            {[...Array(diceValue)].map((_, i) => <div key={i} className="dot" style={{ backgroundColor: currentTeam.color }} />)}
+                                        </div>
+                                        {/* Back/Side faces for 3D effect */}
+                                        <div className="dice-face face-2 opacity-20" style={{ transform: 'rotateY(180deg) translateZ(70px)' }} />
+                                        <div className="dice-face face-3 opacity-20" style={{ transform: 'rotateY(90deg) translateZ(70px)' }} />
+                                        <div className="dice-face face-4 opacity-20" style={{ transform: 'rotateY(-90deg) translateZ(70px)' }} />
+                                        <div className="dice-face face-5 opacity-20" style={{ transform: 'rotateX(90deg) translateZ(70px)' }} />
+                                        <div className="dice-face face-6 opacity-20" style={{ transform: 'rotateX(-90deg) translateZ(70px)' }} />
                                     </div>
+
+                                    {isDiceDetermined && (
+                                        <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 whitespace-nowrap animate-bounce">
+                                            <span className="text-xs font-black text-accent-gold uppercase tracking-[0.4em] bg-black/40 px-4 py-2 rounded-full border border-accent-gold/20 backdrop-blur-md">Click to Continue</span>
+                                        </div>
+                                    )}
                                 </div>
 
-                                <div className="flex flex-col gap-5 w-full max-w-md relative z-10">
+                                <div className="flex flex-col gap-5 w-full max-w-sm relative z-10">
                                     <button
-                                        onClick={rollDice}
+                                        onClick={isDiceDetermined ? initiateQuestionPhase : rollDice}
                                         disabled={isRolling}
-                                        className={`button-premium text-3xl py-10 px-12 rounded-3xl flex items-center justify-center gap-6 shadow-2xl group/roll ${isRolling ? 'opacity-30 grayscale pointer-events-none' : ''}`}
+                                        className={`button-premium text-2xl py-8 px-10 rounded-3xl flex items-center justify-center gap-6 shadow-2xl group/roll ${isRolling ? 'opacity-30 grayscale pointer-events-none' : ''}`}
                                     >
-                                        <Dices size={44} className="group-hover/roll:rotate-45 transition-transform duration-500 text-accent-gold" />
-                                        <span className="font-black italic tracking-widest leading-none">{isRolling ? 'ROLLING...' : 'INITIATE ROLL'}</span>
+                                        <Dices size={32} className={`${isRolling ? 'animate-spin' : 'group-hover/roll:rotate-45'} transition-transform duration-500 text-accent-gold`} />
+                                        <span className="font-black italic tracking-widest leading-none">
+                                            {isRolling ? 'STABILIZING...' : isDiceDetermined ? 'VIEW QUESTION' : 'INITIATE ROLL'}
+                                        </span>
                                     </button>
-                                    <div className="flex items-center gap-3 justify-center opacity-30">
-                                        <div className="h-px w-8 bg-white" />
-                                        <p className="text-center text-[10px] font-black text-white uppercase tracking-[0.4em]">Protocol Validation Required</p>
-                                        <div className="h-px w-8 bg-white" />
+                                    <div className="flex items-center gap-3 justify-center opacity-20">
+                                        <div className="h-px w-6 bg-white" />
+                                        <p className="text-center text-[9px] font-black text-white uppercase tracking-[0.4em]">Propulsion Protocol</p>
+                                        <div className="h-px w-6 bg-white" />
                                     </div>
                                 </div>
                             </div>
